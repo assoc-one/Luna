@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    name: lint · type-check · build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # `npm ci` installs from the committed lockfile, so CI resolves exactly
+      # the versions pinned in package.json rather than re-resolving them.
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type-check
+        run: npm run type-check
+
+      # No secrets are set for this job on purpose. The scaffold must build
+      # without credentials — src/lib/env.ts reads process.env lazily at
+      # request time, never at module scope, so a missing key cannot break the
+      # build. If this step ever starts needing a secret, that property has
+      # regressed (see APP-59 / APP-1034).
+      - name: Build
+        run: npm run build
