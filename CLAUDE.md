@@ -27,6 +27,16 @@ This Next major has breaking changes against most training data — `LayoutProps
 in `layout.tsx` and the flat-config-only ESLint setup are both current-major shapes,
 not legacy ones. Do not "modernise" them from memory.
 
+**`type-check` runs `next typegen` first, and must.** Next 16 generates the global
+route types — `LayoutProps<"/">`, `PageProps<...>` — into `.next/types/`, which
+`tsconfig.json` pulls in via its `include`. A bare `tsc --noEmit` on a **clean**
+checkout therefore fails with `TS2304: Cannot find name 'LayoutProps'`, because
+nothing has generated them yet. Locally this hides: once you have run a build, the
+types are on disk and `tsc` passes, so the failure appears only in CI or after
+`rm -rf .next` — a false green on your machine. `next typegen` generates them
+without a full build, which is why it is chained into the script rather than the CI
+job being reordered to build first. Do not "simplify" it back to a bare `tsc`.
+
 **The build runs on Turbopack** (the Next 16 default) and that is deliberate here.
 `convention-vercel` requires `next build --webpack` for repos running **Sanity** or
 other bundler-sensitive libraries, because Turbopack's module resolution breaks
