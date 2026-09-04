@@ -42,3 +42,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# claude code — agent worktrees
+# Subagents running with worktree isolation create .claude/worktrees/<agent-id>/
+# inside the repo. It is transient and auto-cleaned, but while it exists it shows
+# as untracked and trips the session's git-status stop hook. Nothing under
+# .claude/ is tracked here, so nothing stops being visible to git status.
+.claude/
