@@ -88,6 +88,8 @@ npm run type-check     # tsc --noEmit
 npm run tokens         # regenerate src/app/tokens.css from config/tokens.ts
 npm run check:design   # the design-token gate — see below
 npm run verify:shell   # the runtime design check, in a real browser — see below
+npm run verify:orb     # the orb's runtime check, in a real browser — see below
+npm run verify:orb:controls   # the negative controls for that check — see below
 ```
 
 CI runs lint → check:design → type-check → build on every PR to `main`
@@ -169,14 +171,84 @@ wrapper so a route change replays the enter animation. `children` is
 server-rendered output passed straight through — no functions cross the boundary.
 `prefers-reduced-motion` is honoured in `globals.css`, at the point of use.
 
+## The orb — one animation, and a state is a set of numbers
+
+`src/components/LunaOrb.tsx` renders every state of the orb; `config/orb.ts` holds
+the three sizes, the five states, and the parameters each state animates with. The
+bench is at **`/dev/orb`**.
+
+**The orb is not five animations.** The obvious build — a variant per state, each
+a keyframe loop — cannot satisfy "smooth transitions between states", because
+animating *to* a keyframe array starts at that array's first frame: a state change
+snaps every channel from wherever the old loop had got to onto the new loop's
+opening value. Threading `null` as the opening keyframe moves the discontinuity
+from the switch into every repeat rather than removing it.
+
+So there is one animation. A phase only ever advances (`phase += dt × pulseHz`),
+a wave is taken from it, and a **state is a set of amplitudes and frequencies**
+applied to that wave. A state change animates the *parameters* from wherever they
+currently are — not from the previous state's declared values, so an interrupted
+transition is continuous too. Every painted value is therefore a continuous
+function of a continuous phase, which makes smoothness a property of the
+construction rather than something to keep an eye on.
+
+If you are adding a state, add it to `orbParams` and nothing else. If you find
+yourself reaching for `variants`, re-read the paragraph above first.
+
+`prefers-reduced-motion: reduce` does not slow the orb down: it removes the driver
+from the tree, so no animation frame is scheduled at all and the motion values keep
+the resting pose they were created with (`orbStatic`) — core and halo, no ring, no
+arc. The initial render is that same resting pose whatever the preference, so the
+server and client markup agree.
+
+### `npm run verify:orb`
+
+The same shape as `verify:shell` — a browser, a production build, its own port
+(3401), a port guard, and one `RESULT pass=<n> fail=<n>` line — and it is not in
+CI for the same reason. It samples the computed transform and opacity of every
+layer on every frame and checks eight things, of which two are worth knowing about:
+
+- **`states-visibly-distinct`** is a feature comparison, not a screenshot diff.
+  Two states can share an instant and still be obviously different to watch, so a
+  single frame proves nothing either way. Each pair has to be separated by at
+  least one measured feature — how far a layer swings, how bright it sits, how
+  fast it moves, how far the arc travels — and the check names which one, so a
+  failure says *how* two states collapsed together.
+- **`state-transitions-smooth`** is a rate of change in units per second,
+  budgeted per channel from the two states' own measured motion. The budget
+  includes a **cross bound** (`π × max(range) × max(frequency)`) because
+  mid-blend the orb runs one state's amplitude at the other's frequency, and rate
+  goes as amplitude × frequency — a blend can legitimately move faster than
+  either state does alone. Budgeting from the two steady rates alone red-flags a
+  perfectly smooth transition between a wide slow state and a narrow fast one.
+
+Add `--shots <dir>` for a PNG per state plus the full bench, with and without
+reduced motion. That is the evidence for the half of "visibly distinct" a
+machine should not be asked to settle.
+
+### `npm run verify:orb:controls`
+
+The negative controls for the check above, as a script rather than as a
+paragraph in a pull request: six deliberate breaks — each an exact find/replace
+on a real source file — applied one at a time with a rebuild and a `verify:orb`
+run in between, then restored, and finishing with an unmodified baseline that
+has to come back green. **Re-run it if you change the harness**, and extend it if
+you add a check; a check nobody has seen fail is not evidence.
+
+It refuses to run on a dirty tree, deliberately. Every control ends in a restore,
+a restore cannot tell a deliberate break from your uncommitted work, and the
+files the controls target are the files that implement the acceptance criteria —
+so on a dirty tree it would revert your change silently and in the flattering
+direction.
+
 ## Current state
 
 **Phase 0 — Foundation.** The scaffold stands, the design tokens and the Shell are
-in place (APP-62), and the home route is still a placeholder. Nothing of the actual
-experience is built: no voice, no Luna orb, no sections, no task flow, no plan
-generation. The home route exists to prove the app builds and renders, and is
-expected to be replaced — but it should be replaced *inside* the Shell and using
-the tokens.
+in place (APP-62), the Luna orb is built (APP-64), and the home route is still a
+placeholder. Nothing else of the experience is built: no voice, no sections, no
+task flow, no plan generation. The home route exists to prove the app builds and
+renders, and is expected to be replaced — but it should be replaced *inside* the
+Shell and using the tokens.
 
 The presentational tickets (design tokens, the Luna orb, progress ring, input
 components, task-screen templates, section content) are unblocked by this scaffold
