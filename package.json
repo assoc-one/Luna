@@ -11,7 +11,8 @@
     "tokens": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-theme.mjs",
     "check:design": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-design.mjs",
     "verify:shell": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-shell.mjs",
-    "verify:orb": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-orb.mjs"
+    "verify:orb": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-orb.mjs",
+    "verify:orb:controls": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-orb-controls.mjs"
   },
   "dependencies": {
     "framer-motion": "13.2.0",
