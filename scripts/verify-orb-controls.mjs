@@ -89,7 +89,20 @@ const CONTROLS = [
     file: ORB,
     find: "    const dt = Math.min(delta, orbMotion.maxFrameMs) / 1000;",
     replace: "    const dt = 0;",
-    expectRed: ["every-state-animates", "states-visibly-distinct"],
+    // Two reds, and the one that is *absent* is the informative part.
+    //
+    // `states-visibly-distinct` stays green, correctly: with the phase frozen at
+    // zero every wave sits at its base value, and the base values still differ
+    // per state — different halo brightness, ring present or not, arc present or
+    // not. Five frozen orbs really are five distinguishable pictures. Freezing
+    // is caught by `every-state-animates`, which is the check that exists for it.
+    //
+    // `state-transitions-smooth` reddens because the smoothness budget is
+    // derived from each state's *measured* motion, and a frozen state measures
+    // none — so the blend's own movement of the resting values (which is still
+    // running; only the wave stopped) exceeds a budget that has collapsed to the
+    // floor. That is the budget behaving as designed rather than a second defect.
+    expectRed: ["every-state-animates", "state-transitions-smooth"],
   },
 ];
 
