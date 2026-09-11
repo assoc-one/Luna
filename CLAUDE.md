@@ -87,6 +87,7 @@ npm run lint           # eslint
 npm run type-check     # tsc --noEmit
 npm run tokens         # regenerate src/app/tokens.css from config/tokens.ts
 npm run check:design   # the design-token gate — see below
+npm run verify:shell   # the runtime design check, in a real browser — see below
 ```
 
 CI runs lint → check:design → type-check → build on every PR to `main`
@@ -123,6 +124,38 @@ every one of them — pass and fail — to **stdout**, ending in a single
   and only accepts literals, so those names cannot be imported and have to be
   repeated; this is what keeps the repetition honest. If it ever diverged, the
   theme would point at an undefined variable and silently fall back to system-ui.
+
+## `npm run verify:shell` — the runtime half, and why it is not in CI
+
+`check:design` reads the source. `verify:shell` drives the **built** app in a
+real browser and measures what is actually painted: the shell's geometry at 390px
+and at 1440px, which faces the text renders in, whether any request leaves for
+Google's font CDN, and every colour that reaches a pixel. None of that is visible
+to `tsc`, `eslint`, or a diff.
+
+```sh
+npm run build
+npm run verify:shell                 # add --shots <dir> for screenshots
+```
+
+**No browser is a dependency of this repo, and none should be added.** Playwright
+is in neither `dependencies` nor `devDependencies`; the script reaches the image's
+global install by absolute path via `createRequire`, because a bare
+`import "playwright"` resolves against *this repo's* `node_modules` — the exact
+dependency being avoided. Both paths are overridable and are properties of the
+image, not of this repo, so set the variables rather than editing the script:
+
+| Variable | Default on the current image |
+| -- | -- |
+| `PLAYWRIGHT_MODULE_PATH` | `/opt/node22/lib/node_modules/playwright` |
+| `PLAYWRIGHT_EXECUTABLE_PATH` | `/opt/pw-browsers/chromium-1194/chrome-linux/chrome` |
+
+That is also why it is **not** wired into CI: the CI runner has no browser, and a
+gate that cannot run is worse than one that is run deliberately. It boots its own
+server on 3400 and asserts the port was free first — a stale server from an
+earlier run answering for an old build is the classic false green. If that abort
+fires, note that Next renames its process, so the orphan appears in `ps` as
+`next-server (v16.3.2)` and `pkill -f "next start"` will miss it.
 
 ## The Shell
 

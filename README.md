@@ -32,6 +32,7 @@ No credentials are required to run, build, lint or type-check the app as it stan
 | `npm run type-check` | `tsc --noEmit` |
 | `npm run tokens` | Regenerate `src/app/tokens.css` from `config/tokens.ts` |
 | `npm run check:design` | The design-token gate (theme in sync, palette-only, font variables) |
+| `npm run verify:shell` | Runtime design check — drives the built app in a browser |
 
 CI runs lint, the design gate, type-check and build on every pull request to `main`.
 
@@ -51,6 +52,10 @@ anywhere under `src/`.
 Every route renders inside `src/components/Shell.tsx`, mounted once in the root
 layout: a 390px column that is the whole viewport on a phone and a centred
 column on a soft gradient backdrop above the `frame` breakpoint.
+
+`npm run verify:shell` measures all of that in a real browser against a
+production build. It is run deliberately rather than in CI, and adds no browser
+dependency — see [`CLAUDE.md`](./CLAUDE.md) for how it resolves one.
 
 ## Stack
 
