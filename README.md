@@ -30,8 +30,27 @@ No credentials are required to run, build, lint or type-check the app as it stan
 | `npm run start` | Serve a production build |
 | `npm run lint` | ESLint |
 | `npm run type-check` | `tsc --noEmit` |
+| `npm run tokens` | Regenerate `src/app/tokens.css` from `config/tokens.ts` |
+| `npm run check:design` | The design-token gate (theme in sync, palette-only, font variables) |
 
-CI runs lint, type-check and build on every pull request to `main`.
+CI runs lint, the design gate, type-check and build on every pull request to `main`.
+
+## Design tokens
+
+`config/tokens.ts` is the single source of truth for colour, type, spacing,
+motion, elevation and layout. Tailwind v4 keeps its theme in CSS, so
+`src/app/tokens.css` is **generated** from it — edit the tokens, run
+`npm run tokens`, commit both. `npm run check:design` fails while the two are
+out of step, so the generated file cannot quietly drift.
+
+The palette is greyscale plus a single warm-orange accent (a locked MVP
+decision). The generated theme clears Tailwind's default colour palette
+outright, and the gate fails on a colour literal or an off-palette utility class
+anywhere under `src/`.
+
+Every route renders inside `src/components/Shell.tsx`, mounted once in the root
+layout: a 390px column that is the whole viewport on a phone and a centred
+column on a soft gradient backdrop above the `frame` breakpoint.
 
 ## Stack
 

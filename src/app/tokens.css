@@ -1,0 +1,96 @@
+/* ------------------------------------------------------------------------- *
+ * GENERATED FILE — DO NOT EDIT.
+ *
+ * Source:      config/tokens.ts
+ * Regenerate:  npm run tokens
+ * Gate:        npm run check:design   (CI fails if this file has drifted)
+ *
+ * Edit the tokens, not this file. A hand-edit here is reverted by the next
+ * `npm run tokens` and rejected by CI in the meantime.
+ * ------------------------------------------------------------------------- */
+
+@theme {
+  /* colour — Tailwind's default palette is cleared first */
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-inherit: inherit;
+
+  /* colour — palette */
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-grey-950: #0a0a0a;
+  --color-grey-900: #171717;
+  --color-grey-800: #262626;
+  --color-grey-600: #525252;
+  --color-grey-400: #a3a3a3;
+  --color-grey-200: #e5e5e5;
+  --color-accent: #ff7a18;
+
+  /* colour — semantic aliases */
+  --color-background: #0a0a0a;
+  --color-backdrop: #000000;
+  --color-foreground: #e5e5e5;
+  --color-muted: #a3a3a3;
+  --color-border: #262626;
+  --color-elevated: #171717;
+  --color-accent-contrast: #000000;
+
+  /* type — families */
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-body);
+
+  /* type — size */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+
+  /* type — weight */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* type — leading */
+  --leading-tight: 1.15;
+  --leading-snug: 1.3;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+
+  /* type — tracking */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.04em;
+  --tracking-widest: 0.18em;
+
+  /* spacing — base step; every utility derives from it */
+  --spacing: 0.25rem;
+
+  /* motion — duration */
+  --duration-instant: 0ms;
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+  --duration-slower: 500ms;
+
+  /* motion — easing */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-entrance: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --ease-exit: cubic-bezier(0.3, 0, 0.8, 0.15);
+
+  /* motion — page transition */
+  --page-enter-offset: 0.5rem;
+
+  /* elevation */
+  --shadow-shell: 0 32px 90px -32px #000000;
+
+  /* layout */
+  --container-shell: 390px;
+  --breakpoint-frame: 30rem;
+}

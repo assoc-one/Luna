@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "type-check": "next typegen && tsc --noEmit"
+    "type-check": "next typegen && tsc --noEmit",
+    "tokens": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-theme.mjs",
+    "check:design": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-design.mjs"
   },
   "dependencies": {
     "next": "16.3.2",
