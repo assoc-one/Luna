@@ -6,6 +6,12 @@
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
+    // `config/*.ts` is loaded from three places with three resolvers: the app
+    // bundler, `tsc`, and Node's own type stripping in the build scripts
+    // (`scripts/*.mjs`). Node ESM requires the extension, so a module under
+    // `config/` that imports a sibling has to write `./tokens.ts` — which `tsc`
+    // rejects without this. Safe here because nothing is emitted.
+    "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
