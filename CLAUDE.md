@@ -89,6 +89,7 @@ npm run tokens         # regenerate src/app/tokens.css from config/tokens.ts
 npm run check:design   # the design-token gate — see below
 npm run verify:shell   # the runtime design check, in a real browser — see below
 npm run verify:orb     # the orb's runtime check, in a real browser — see below
+npm run verify:orb:controls   # the negative controls for that check — see below
 ```
 
 CI runs lint → check:design → type-check → build on every PR to `main`
@@ -224,6 +225,21 @@ layer on every frame and checks eight things, of which two are worth knowing abo
 Add `--shots <dir>` for a PNG per state plus the full bench, with and without
 reduced motion. That is the evidence for the half of "visibly distinct" a
 machine should not be asked to settle.
+
+### `npm run verify:orb:controls`
+
+The negative controls for the check above, as a script rather than as a
+paragraph in a pull request: six deliberate breaks — each an exact find/replace
+on a real source file — applied one at a time with a rebuild and a `verify:orb`
+run in between, then restored, and finishing with an unmodified baseline that
+has to come back green. **Re-run it if you change the harness**, and extend it if
+you add a check; a check nobody has seen fail is not evidence.
+
+It refuses to run on a dirty tree, deliberately. Every control ends in a restore,
+a restore cannot tell a deliberate break from your uncommitted work, and the
+files the controls target are the files that implement the acceptance criteria —
+so on a dirty tree it would revert your change silently and in the flattering
+direction.
 
 ## Current state
 

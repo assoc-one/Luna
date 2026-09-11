@@ -34,6 +34,7 @@ No credentials are required to run, build, lint or type-check the app as it stan
 | `npm run check:design` | The design-token gate (theme in sync, palette-only, font variables) |
 | `npm run verify:shell` | Runtime design check — drives the built app in a browser |
 | `npm run verify:orb` | Runtime check for the Luna orb — same, against `/dev/orb` |
+| `npm run verify:orb:controls` | The negative controls for that check (six breaks + a clean baseline) |
 
 CI runs lint, the design gate, type-check and build on every pull request to `main`.
 
