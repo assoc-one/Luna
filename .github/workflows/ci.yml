@@ -27,6 +27,13 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      # The design-token gate: the generated Tailwind theme still matches
+      # config/tokens.ts, nothing under src/ introduces a colour outside the
+      # palette, and layout.tsx still declares the font variables the theme
+      # points at. See scripts/check-design.mjs for what each check is for.
+      - name: Check design tokens
+        run: npm run check:design
+
       - name: Type-check
         run: npm run type-check
 

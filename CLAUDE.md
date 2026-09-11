@@ -81,21 +81,102 @@ None of these are needed to run `npm run build`, `npm run lint`, or
 ## Scripts
 
 ```sh
-npm run dev          # dev server
-npm run build        # production build
-npm run lint         # eslint
-npm run type-check   # tsc --noEmit
+npm run dev            # dev server
+npm run build          # production build
+npm run lint           # eslint
+npm run type-check     # tsc --noEmit
+npm run tokens         # regenerate src/app/tokens.css from config/tokens.ts
+npm run check:design   # the design-token gate — see below
+npm run verify:shell   # the runtime design check, in a real browser — see below
 ```
 
-CI runs lint → type-check → build on every PR to `main` (`.github/workflows/ci.yml`).
-Run all three locally before opening a PR.
+CI runs lint → check:design → type-check → build on every PR to `main`
+(`.github/workflows/ci.yml`). Run all of them locally before opening a PR.
+
+## Design tokens — `config/tokens.ts` is the source, `src/app/tokens.css` is generated
+
+Tailwind v4 is CSS-first: its theme lives in an `@theme` block, not a JS config
+object, so it cannot import a TypeScript module. The tokens are TypeScript because
+the app and the build scripts both need them. Those two facts would normally mean
+two sources of truth, so **`src/app/tokens.css` is generated** —
+
+```sh
+npm run tokens         # config/tokens.ts  →  src/app/tokens.css
+npm run check:design   # fails if they have drifted (CI runs this)
+```
+
+Edit the tokens, regenerate, commit both. A hand-edit to `src/app/tokens.css` is
+reverted by the next `npm run tokens` and rejected by CI in the meantime.
+
+`npm run check:design` (`scripts/check-design.mjs`) runs three checks and reports
+every one of them — pass and fail — to **stdout**, ending in a single
+`RESULT pass=<n> fail=<n>` line:
+
+- **theme-in-sync** — the generated file matches what the tokens render to.
+- **palette-only** — nothing under `src/` introduces a colour outside the palette.
+  Greyscale plus one warm orange is a locked MVP decision (project decision log,
+  2026-05-21), so a second hue should be a decision, not a diff. The generated
+  theme also clears Tailwind's default colour palette (`--color-*: initial`), so
+  `bg-sky-500` and friends do not exist as utilities at all — the check is the
+  loud half of a constraint that is already structural.
+- **font-variables** — `src/app/layout.tsx` still declares the CSS custom
+  properties named in `type.fontVariable`. `next/font` is a build-time transform
+  and only accepts literals, so those names cannot be imported and have to be
+  repeated; this is what keeps the repetition honest. If it ever diverged, the
+  theme would point at an undefined variable and silently fall back to system-ui.
+
+## `npm run verify:shell` — the runtime half, and why it is not in CI
+
+`check:design` reads the source. `verify:shell` drives the **built** app in a
+real browser and measures what is actually painted: the shell's geometry at 390px
+and at 1440px, which faces the text renders in, whether any request leaves for
+Google's font CDN, and every colour that reaches a pixel. None of that is visible
+to `tsc`, `eslint`, or a diff.
+
+```sh
+npm run build
+npm run verify:shell                 # add --shots <dir> for screenshots
+```
+
+**No browser is a dependency of this repo, and none should be added.** Playwright
+is in neither `dependencies` nor `devDependencies`; the script reaches the image's
+global install by absolute path via `createRequire`, because a bare
+`import "playwright"` resolves against *this repo's* `node_modules` — the exact
+dependency being avoided. Both paths are overridable and are properties of the
+image, not of this repo, so set the variables rather than editing the script:
+
+| Variable | Default on the current image |
+| -- | -- |
+| `PLAYWRIGHT_MODULE_PATH` | `/opt/node22/lib/node_modules/playwright` |
+| `PLAYWRIGHT_EXECUTABLE_PATH` | `/opt/pw-browsers/chromium-1194/chrome-linux/chrome` |
+
+That is also why it is **not** wired into CI: the CI runner has no browser, and a
+gate that cannot run is worse than one that is run deliberately. It boots its own
+server on 3400 and asserts the port was free first — a stale server from an
+earlier run answering for an old build is the classic false green. If that abort
+fires, note that Next renames its process, so the orphan appears in `ps` as
+`next-server (v16.3.2)` and `pkill -f "next start"` will miss it.
+
+## The Shell
+
+`src/components/Shell.tsx` is mounted once in the root layout, so **every route
+renders inside it** by construction rather than by convention. It is a 390px
+column (`--container-shell`) that is the whole viewport on a phone and a centred
+column on a gradient backdrop above `--breakpoint-frame`; both are tokens.
+
+It is a Client Component solely for `usePathname`, which keys the transition
+wrapper so a route change replays the enter animation. `children` is
+server-rendered output passed straight through — no functions cross the boundary.
+`prefers-reduced-motion` is honoured in `globals.css`, at the point of use.
 
 ## Current state
 
-**Phase 0 — Foundation.** The scaffold stands and renders a placeholder home route.
-Nothing of the actual experience is built: no voice, no Luna orb, no sections, no
-task flow, no plan generation. The home route exists to prove the app builds and
-renders, and is expected to be replaced.
+**Phase 0 — Foundation.** The scaffold stands, the design tokens and the Shell are
+in place (APP-62), and the home route is still a placeholder. Nothing of the actual
+experience is built: no voice, no Luna orb, no sections, no task flow, no plan
+generation. The home route exists to prove the app builds and renders, and is
+expected to be replaced — but it should be replaced *inside* the Shell and using
+the tokens.
 
 The presentational tickets (design tokens, the Luna orb, progress ring, input
 components, task-screen templates, section content) are unblocked by this scaffold

@@ -1,28 +1,91 @@
 @import "tailwindcss";
+@import "./tokens.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ---------------------------------------------------------------------------
+ * Base
+ *
+ * Luna is a dark product: a near-black canvas so attention sits on the orb and
+ * the conversation. `color-scheme: dark` is declared rather than inferred, so
+ * form controls, scrollbars and the pre-paint background all agree with it —
+ * and so there is no light/dark fork to keep in step. This is a deliberate
+ * single look, not a missing theme.
+ * ------------------------------------------------------------------------- */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  block-size: 100%;
+  color-scheme: dark;
+  background-color: var(--color-backdrop);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  /* Geist is loaded in layout.tsx and exposed as --font-geist-sans; the
-     create-next-app default hard-coded Arial here, which silently discarded it. */
-  font-family: var(--font-sans), system-ui, sans-serif;
+  min-block-size: 100%;
+  background-color: var(--color-backdrop);
+  color: var(--color-foreground);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer components {
+  /* -------------------------------------------------------------------------
+   * The shell
+   *
+   * Two pieces. `.app-backdrop` is everything outside the 390px column: a very
+   * soft lift from `elevated` at the top to `backdrop` below, so a wide
+   * viewport reads as a surface the app is sitting on rather than a void it is
+   * floating in. `.app-shell` is the column itself, a shade off the backdrop so
+   * its edges are legible before any border is drawn.
+   *
+   * The breakpoint at which the column stops being the whole viewport is
+   * `--breakpoint-frame` (the `frame:` variant), which is a token — see
+   * `config/tokens.ts`. It sits comfortably above the shell's own width so that
+   * at exactly 390px the app is full-bleed, with no stray chrome down the side.
+   * ---------------------------------------------------------------------- */
+
+  .app-backdrop {
+    background-color: var(--color-backdrop);
+    background-image: radial-gradient(
+      140% 100% at 50% 0%,
+      var(--color-elevated) 0%,
+      var(--color-backdrop) 62%
+    );
+    background-attachment: fixed;
+  }
+
+  .app-shell {
+    background-color: var(--color-background);
+  }
+
+  /* -------------------------------------------------------------------------
+   * Page transitions
+   *
+   * Applied by `Shell` to a wrapper keyed on the pathname, so every route
+   * change replays the animation. Durations and easings come from the motion
+   * tokens; the offset is deliberately one spacing step — a nudge, not a slide.
+   * ---------------------------------------------------------------------- */
+
+  .page-enter {
+    animation: page-enter var(--duration-base) var(--ease-entrance) both;
+  }
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--page-enter-offset));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Unlayered on purpose: this has to beat the `components` rule above. */
+@media (prefers-reduced-motion: reduce) {
+  .page-enter {
+    animation: none;
+  }
 }
