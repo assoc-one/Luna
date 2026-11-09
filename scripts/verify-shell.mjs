@@ -20,14 +20,17 @@
  * overridable:
  *
  *   PLAYWRIGHT_MODULE_PATH      default /opt/node22/lib/node_modules/playwright
- *   PLAYWRIGHT_EXECUTABLE_PATH  default /opt/pw-browsers/chromium-1243/chrome-linux64/chrome
+ *   PLAYWRIGHT_EXECUTABLE_PATH  default: the module's own chromium.executablePath(),
+ *                               never a pinned build number
  *
- * They are properties of the image, not of this repo, and they move when the
- * image does — so set the variables rather than editing this file. If neither
- * resolves, the script exits with the path it tried rather than failing
- * obscurely. That is also why this is **not** wired into CI: the CI runner has
- * no browser, and a gate that cannot run is worse than one that is run
- * deliberately.
+ * The module path is a property of the image, not of this repo, and moves when
+ * the image does — so set the variable rather than editing this file. Chromium's
+ * own build number moves with the image too (it was chromium-1194/chrome-linux
+ * before this), which is why its default is resolved from the install rather
+ * than hard-coded. If neither resolves, the script exits with the path it tried
+ * rather than failing obscurely. That is also why this is **not** wired into
+ * CI: the CI runner has no browser, and a gate that cannot run is worse than
+ * one that is run deliberately.
  *
  * ## It boots its own server, and asserts the port was free first
  *
@@ -70,9 +73,8 @@ const shotsDir = shotsFlag === -1 ? null : process.argv[shotsFlag + 1];
 
 const MODULE_PATH =
   process.env.PLAYWRIGHT_MODULE_PATH ?? "/opt/node22/lib/node_modules/playwright";
-const EXECUTABLE_PATH =
-  process.env.PLAYWRIGHT_EXECUTABLE_PATH ??
-  "/opt/pw-browsers/chromium-1243/chrome-linux64/chrome";
+// EXECUTABLE_PATH is resolved below, after `chromium` loads, from that same
+// install's own chromium.executablePath() — never a pinned build number.
 
 const results = [];
 const record = (name, ok, detail) => results.push({ name, ok, detail });
@@ -131,9 +133,11 @@ async function waitForServer(url, timeoutMs = 60_000) {
 
 let require_;
 let chromium;
+let EXECUTABLE_PATH;
 try {
   require_ = createRequire(import.meta.url);
   ({ chromium } = require_(MODULE_PATH));
+  EXECUTABLE_PATH = process.env.PLAYWRIGHT_EXECUTABLE_PATH ?? chromium.executablePath();
 } catch (err) {
   console.error(
     `Could not load Playwright from ${MODULE_PATH}. Set PLAYWRIGHT_MODULE_PATH ` +

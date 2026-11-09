@@ -150,7 +150,14 @@ image, not of this repo, so set the variables rather than editing the script:
 | Variable | Default on the current image |
 | -- | -- |
 | `PLAYWRIGHT_MODULE_PATH` | `/opt/node22/lib/node_modules/playwright` |
-| `PLAYWRIGHT_EXECUTABLE_PATH` | `/opt/pw-browsers/chromium-1243/chrome-linux64/chrome` |
+| `PLAYWRIGHT_EXECUTABLE_PATH` | that module's own `chromium.executablePath()` — never a pinned build number |
+
+Dated measurement only, not a live default: as of 2026-10-27 that resolves to
+`/opt/pw-browsers/chromium-1243/chrome-linux64/chrome` (it was
+`chromium-1194/chrome-linux` before), and a version-independent
+`/opt/pw-browsers/chromium` symlink also points at the current binary — but
+neither figure is written into either script as a fallback, because the build
+number moves with the image.
 
 That is also why it is **not** wired into CI: the CI runner has no browser, and a
 gate that cannot run is worse than one that is run deliberately. It boots its own

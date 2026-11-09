@@ -52,7 +52,11 @@
  * the variables rather than editing this file:
  *
  *   PLAYWRIGHT_MODULE_PATH      default /opt/node22/lib/node_modules/playwright
- *   PLAYWRIGHT_EXECUTABLE_PATH  default /opt/pw-browsers/chromium-1243/chrome-linux64/chrome
+ *   PLAYWRIGHT_EXECUTABLE_PATH  default: the module's own chromium.executablePath(),
+ *                               never a pinned build number — Chromium's build
+ *                               moves with the image too (it was chromium-1194
+ *                               before this), so the default is resolved from
+ *                               the install rather than hard-coded here.
  *
  * That is also why this is **not** in CI: the CI runner has no browser, and a
  * gate that cannot run is worse than one that is run deliberately.
@@ -79,9 +83,8 @@ const shotsDir = shotsFlag === -1 ? null : process.argv[shotsFlag + 1];
 
 const MODULE_PATH =
   process.env.PLAYWRIGHT_MODULE_PATH ?? "/opt/node22/lib/node_modules/playwright";
-const EXECUTABLE_PATH =
-  process.env.PLAYWRIGHT_EXECUTABLE_PATH ??
-  "/opt/pw-browsers/chromium-1243/chrome-linux64/chrome";
+// EXECUTABLE_PATH is resolved below, after `chromium` loads, from that same
+// install's own chromium.executablePath() — never a pinned build number.
 
 /** How long each state is watched for. Long enough for the slowest state's cycle. */
 const SAMPLE_MS = 4000;
@@ -328,8 +331,10 @@ const round = (n, dp = 3) => Number(n.toFixed(dp));
 // ---------------------------------------------------------------------------
 
 let chromium;
+let EXECUTABLE_PATH;
 try {
   ({ chromium } = createRequire(import.meta.url)(MODULE_PATH));
+  EXECUTABLE_PATH = process.env.PLAYWRIGHT_EXECUTABLE_PATH ?? chromium.executablePath();
 } catch (err) {
   console.error(
     `Could not load Playwright from ${MODULE_PATH}. Set PLAYWRIGHT_MODULE_PATH ` +
