@@ -150,7 +150,7 @@ image, not of this repo, so set the variables rather than editing the script:
 | Variable | Default on the current image |
 | -- | -- |
 | `PLAYWRIGHT_MODULE_PATH` | `/opt/node22/lib/node_modules/playwright` |
-| `PLAYWRIGHT_EXECUTABLE_PATH` | `/opt/pw-browsers/chromium-1194/chrome-linux/chrome` |
+| `PLAYWRIGHT_EXECUTABLE_PATH` | `/opt/pw-browsers/chromium-1243/chrome-linux64/chrome` |
 
 That is also why it is **not** wired into CI: the CI runner has no browser, and a
 gate that cannot run is worse than one that is run deliberately. It boots its own
