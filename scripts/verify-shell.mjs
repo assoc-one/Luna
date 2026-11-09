@@ -20,7 +20,7 @@
  * overridable:
  *
  *   PLAYWRIGHT_MODULE_PATH      default /opt/node22/lib/node_modules/playwright
- *   PLAYWRIGHT_EXECUTABLE_PATH  default /opt/pw-browsers/chromium-1194/chrome-linux/chrome
+ *   PLAYWRIGHT_EXECUTABLE_PATH  default /opt/pw-browsers/chromium-1243/chrome-linux64/chrome
  *
  * They are properties of the image, not of this repo, and they move when the
  * image does — so set the variables rather than editing this file. If neither
@@ -72,7 +72,7 @@ const MODULE_PATH =
   process.env.PLAYWRIGHT_MODULE_PATH ?? "/opt/node22/lib/node_modules/playwright";
 const EXECUTABLE_PATH =
   process.env.PLAYWRIGHT_EXECUTABLE_PATH ??
-  "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
+  "/opt/pw-browsers/chromium-1243/chrome-linux64/chrome";
 
 const results = [];
 const record = (name, ok, detail) => results.push({ name, ok, detail });

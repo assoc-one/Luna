@@ -52,7 +52,7 @@
  * the variables rather than editing this file:
  *
  *   PLAYWRIGHT_MODULE_PATH      default /opt/node22/lib/node_modules/playwright
- *   PLAYWRIGHT_EXECUTABLE_PATH  default /opt/pw-browsers/chromium-1194/chrome-linux/chrome
+ *   PLAYWRIGHT_EXECUTABLE_PATH  default /opt/pw-browsers/chromium-1243/chrome-linux64/chrome
  *
  * That is also why this is **not** in CI: the CI runner has no browser, and a
  * gate that cannot run is worse than one that is run deliberately.
@@ -81,7 +81,7 @@ const MODULE_PATH =
   process.env.PLAYWRIGHT_MODULE_PATH ?? "/opt/node22/lib/node_modules/playwright";
 const EXECUTABLE_PATH =
   process.env.PLAYWRIGHT_EXECUTABLE_PATH ??
-  "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
+  "/opt/pw-browsers/chromium-1243/chrome-linux64/chrome";
 
 /** How long each state is watched for. Long enough for the slowest state's cycle. */
 const SAMPLE_MS = 4000;
